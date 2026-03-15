@@ -1,0 +1,652 @@
+/* ============================================================
+   NÄSI MEDICAL — Redesigned Clinical Documentation UI
+   Design: Modern clinical, card-based, calm & trustworthy
+   ============================================================ */
+
+/* --- CSS Variables / Design Tokens --- */
+:root {
+  /* Base palette */
+  --bg-workspace: #eef1f6;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f8f9fc;
+  --bg-muted: #f4f6f9;
+
+  /* Text */
+  --text-primary: #1e2a3a;
+  --text-secondary: #5a6a7e;
+  --text-tertiary: #8c97a7;
+  --text-on-accent: #ffffff;
+
+  /* Accent — restrained clinical blue */
+  --accent: #2e6bd6;
+  --accent-light: #e8f0fe;
+  --accent-hover: #2459b8;
+  --accent-subtle: #dce6f7;
+
+  /* Borders & elevation */
+  --border-light: #e2e6ed;
+  --border-subtle: #ebeef3;
+  --shadow-sm: 0 1px 3px rgba(30, 42, 58, 0.06);
+  --shadow-md: 0 2px 8px rgba(30, 42, 58, 0.08);
+  --shadow-lg: 0 4px 20px rgba(30, 42, 58, 0.10);
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* Spacing scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Score colors */
+  --risk-low: #d4edda;
+  --risk-low-border: #78c48a;
+  --risk-moderate: #fff3cd;
+  --risk-moderate-border: #e0a832;
+  --risk-high: #f8d7da;
+  --risk-high-border: #e05d68;
+
+  /* Multi-select accent */
+  --multi-selected: #2e6bd6;
+}
+
+/* --- Reset & Base --- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  background-color: var(--bg-workspace);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* --- App Wrapper --- */
+.app-wrapper {
+  min-height: 100vh;
+  padding: var(--space-lg);
+  display: flex;
+  justify-content: center;
+}
+
+/* --- App Container (the main "window") --- */
+.app-container {
+  width: 100%;
+  max-width: 1440px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: calc(100vh - var(--space-xl) * 2);
+}
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  flex-shrink: 0;
+}
+
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.brand-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.brand-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border-light);
+}
+
+.brand-context {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  font-weight: 400;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.answer-count {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  background: var(--bg-muted);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+/* ============================================================
+   NAVIGATION TABS
+   ============================================================ */
+.section-nav {
+  display: flex;
+  gap: var(--space-xs);
+  padding: 0 var(--space-lg);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+
+.nav-tab {
+  position: relative;
+  padding: var(--space-md) var(--space-lg);
+  border: none;
+  background: none;
+  color: var(--text-tertiary);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.nav-tab:hover {
+  color: var(--text-secondary);
+}
+
+.nav-tab.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.nav-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: var(--space-md);
+  right: var(--space-md);
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px 2px 0 0;
+}
+
+/* ============================================================
+   MAIN CONTENT — Two Panel Layout
+   ============================================================ */
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* --- Left Panel (Questions) --- */
+.left-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-lg);
+  background: var(--bg-muted);
+  border-right: 1px solid var(--border-subtle);
+}
+
+.left-panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* --- Section Header Card --- */
+.section-header-card {
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.section-description {
+  font-size: 0.82rem;
+  color: var(--text-tertiary);
+  margin-top: var(--space-xs);
+  font-style: italic;
+}
+
+/* --- Question Cards --- */
+.question-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease;
+}
+
+.question-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* --- SubSection Cards (STATUS) --- */
+.sub-section-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease;
+}
+
+.sub-section-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.sub-section-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--accent-subtle);
+}
+
+/* ============================================================
+   QUESTION BLOCKS
+   ============================================================ */
+.question-block {
+  margin-bottom: var(--space-sm);
+}
+
+.question-block:last-child {
+  margin-bottom: 0;
+}
+
+.question-block.depth-1 {
+  margin-top: var(--space-md);
+  margin-left: var(--space-md);
+  padding-left: var(--space-md);
+  border-left: 2px solid var(--accent-subtle);
+}
+
+.question-block.depth-2 {
+  margin-top: var(--space-sm);
+  margin-left: var(--space-md);
+  padding-left: var(--space-md);
+  border-left: 2px solid var(--border-light);
+}
+
+.question-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+  line-height: 1.4;
+}
+
+/* ============================================================
+   OPTION BUTTONS
+   ============================================================ */
+.options-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.option-button {
+  padding: 7px 14px;
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  line-height: 1.3;
+}
+
+.option-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+.option-button.selected {
+  background-color: var(--accent);
+  color: var(--text-on-accent);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.option-button.selected:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.option-button.multi.selected {
+  background-color: var(--multi-selected);
+  border-color: var(--multi-selected);
+  color: var(--text-on-accent);
+}
+
+.points-badge {
+  margin-left: 6px;
+  font-size: 0.72rem;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+/* ============================================================
+   TEXT INPUT
+   ============================================================ */
+.text-input {
+  width: 100%;
+  padding: 9px 14px;
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.text-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(46, 107, 214, 0.12);
+}
+
+/* ============================================================
+   SUB-QUESTIONS ANIMATION
+   ============================================================ */
+.sub-questions {
+  margin-top: var(--space-sm);
+  animation: fadeSlideIn 0.2s ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   STarT SCORE DISPLAY
+   ============================================================ */
+.start-score-display {
+  margin-top: var(--space-sm);
+}
+
+.score-box {
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  background-color: var(--risk-low);
+  border: 1.5px solid var(--risk-low-border);
+}
+
+.score-box.risk-kohtalainen {
+  background-color: var(--risk-moderate);
+  border-color: var(--risk-moderate-border);
+}
+
+.score-box.risk-korkea {
+  background-color: var(--risk-high);
+  border-color: var(--risk-high-border);
+}
+
+.score-box h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+  color: var(--text-primary);
+}
+
+.score-box p {
+  font-size: 0.85rem;
+  margin-bottom: 3px;
+  color: var(--text-secondary);
+}
+
+.risk-level {
+  margin-top: var(--space-sm);
+  font-size: 0.92rem !important;
+  font-weight: 500;
+  color: var(--text-primary) !important;
+}
+
+/* ============================================================
+   RIGHT PANEL — Clinical Note
+   ============================================================ */
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.note-panel-header {
+  padding: var(--space-md) var(--space-lg);
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.note-panel-header h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-on-accent);
+  letter-spacing: -0.01em;
+}
+
+.note-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-lg);
+  background: var(--bg-surface);
+}
+
+/* --- Note Actions --- */
+.note-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.action-button {
+  padding: 7px 16px;
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+}
+
+.action-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.copy-button {
+  background: var(--accent-light);
+  border-color: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.copy-button:hover {
+  background: var(--accent);
+  color: var(--text-on-accent);
+  border-color: var(--accent);
+}
+
+.clear-button:hover {
+  border-color: var(--risk-high-border);
+  color: var(--risk-high-border);
+  background: var(--risk-high);
+}
+
+/* --- Note Content --- */
+.note-content {
+  min-height: 200px;
+}
+
+.note-placeholder {
+  text-align: center;
+  padding: var(--space-xl) var(--space-lg);
+}
+
+.note-placeholder p {
+  color: var(--text-tertiary);
+  font-size: 0.92rem;
+}
+
+.placeholder-hint {
+  font-size: 0.82rem !important;
+  margin-top: var(--space-sm);
+  color: var(--text-tertiary);
+}
+
+.note-section {
+  margin-bottom: var(--space-lg);
+}
+
+.note-section:last-child {
+  margin-bottom: 0;
+}
+
+.note-section-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--accent-subtle);
+  letter-spacing: 0.02em;
+}
+
+.note-text {
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+}
+
+.note-text:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================================
+   SCROLLBAR STYLING
+   ============================================================ */
+.left-panel::-webkit-scrollbar,
+.note-panel-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.left-panel::-webkit-scrollbar-track,
+.note-panel-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.left-panel::-webkit-scrollbar-thumb,
+.note-panel-body::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 3px;
+}
+
+.left-panel::-webkit-scrollbar-thumb:hover,
+.note-panel-body::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1024px) {
+  .app-wrapper {
+    padding: var(--space-md);
+  }
+
+  .app-container {
+    height: calc(100vh - var(--space-md) * 2);
+  }
+}
+
+@media (max-width: 768px) {
+  .app-wrapper {
+    padding: 0;
+  }
+
+  .app-container {
+    border-radius: 0;
+    height: 100vh;
+  }
+
+  .main-content {
+    flex-direction: column;
+  }
+
+  .left-panel {
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+    max-height: 55vh;
+  }
+
+  .right-panel {
+    min-height: 45vh;
+  }
+
+  .top-bar-left .brand-context {
+    display: none;
+  }
+
+  .top-bar-left .brand-divider {
+    display: none;
+  }
+}

@@ -1,0 +1,365 @@
+/* ============================================================
+   NASI-MEDICAL - Alaselkäkivun kliininen dokumentaatio
+   ============================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #f0f2f5;
+  color: #1a1a2e;
+}
+
+/* --- App Container --- */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* --- Header --- */
+.app-header {
+  background-color: #1a1a2e;
+  color: white;
+  padding: 16px 24px;
+  text-align: center;
+}
+
+.app-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.app-subtitle {
+  font-size: 14px;
+  color: #a0a0c0;
+}
+
+/* --- Navigation Tabs --- */
+.section-nav {
+  display: flex;
+  background-color: #16213e;
+  padding: 0 16px;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.nav-tab {
+  padding: 12px 20px;
+  border: none;
+  background: none;
+  color: #8888aa;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.nav-tab:hover {
+  color: #ccccee;
+}
+
+.nav-tab.active {
+  color: white;
+  border-bottom-color: #4fc3f7;
+}
+
+/* --- Main Content (Two Panel Layout) --- */
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* --- Left Panel (Questions) --- */
+.left-panel {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  border-right: 2px solid #ddd;
+  background-color: #ffffff;
+}
+
+/* --- Right Panel (Clinical Note) --- */
+.right-panel {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background-color: #f8f9fc;
+}
+
+/* --- Section Titles --- */
+.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #4fc3f7;
+}
+
+.section-description {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.sub-section {
+  margin-top: 28px;
+}
+
+.sub-section-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #16213e;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background-color: #e8eaf6;
+  border-radius: 6px;
+  border-left: 4px solid #4fc3f7;
+}
+
+/* --- Question Blocks --- */
+.question-block {
+  margin-bottom: 18px;
+}
+
+.question-block.depth-1 {
+  margin-left: 20px;
+  padding-left: 12px;
+  border-left: 3px solid #4fc3f7;
+}
+
+.question-block.depth-2 {
+  margin-left: 20px;
+  padding-left: 12px;
+  border-left: 3px solid #81d4fa;
+}
+
+.question-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+/* --- Option Buttons --- */
+.options-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.option-button {
+  padding: 7px 14px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #333;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.option-button:hover {
+  border-color: #4fc3f7;
+  background-color: #e3f2fd;
+}
+
+.option-button.selected {
+  background-color: #1a1a2e;
+  color: white;
+  border-color: #1a1a2e;
+}
+
+.option-button.multi.selected {
+  background-color: #0d47a1;
+  border-color: #0d47a1;
+  color: white;
+}
+
+.points-badge {
+  margin-left: 6px;
+  font-size: 11px;
+  color: #888;
+}
+
+.option-button.selected .points-badge {
+  color: #bbdefb;
+}
+
+/* --- Text Input --- */
+.text-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: #4fc3f7;
+}
+
+/* --- Sub Questions Animation --- */
+.sub-questions {
+  margin-top: 10px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- STarT Score Display --- */
+.start-score-display {
+  margin-top: 24px;
+}
+
+.score-box {
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #e8f5e9;
+  border: 2px solid #66bb6a;
+}
+
+.score-box.risk-kohtalainen {
+  background-color: #fff8e1;
+  border-color: #ffa726;
+}
+
+.score-box.risk-korkea {
+  background-color: #ffebee;
+  border-color: #ef5350;
+}
+
+.score-box h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.score-box p {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.risk-level {
+  margin-top: 8px;
+  font-size: 15px !important;
+}
+
+/* --- Note Panel --- */
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.note-header h2 {
+  font-size: 20px;
+  color: #1a1a2e;
+}
+
+.note-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.copy-button {
+  background-color: #4fc3f7;
+  color: #1a1a2e;
+}
+
+.copy-button:hover {
+  background-color: #29b6f6;
+}
+
+.clear-button {
+  background-color: #ffcdd2;
+  color: #c62828;
+}
+
+.clear-button:hover {
+  background-color: #ef9a9a;
+}
+
+/* --- Note Content --- */
+.note-content {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  min-height: 300px;
+}
+
+.note-placeholder {
+  color: #999;
+  font-style: italic;
+  font-size: 14px;
+}
+
+.note-section {
+  margin-bottom: 16px;
+}
+
+.note-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.note-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.note-text:last-child {
+  margin-bottom: 0;
+}
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+  .main-content {
+    flex-direction: column;
+  }
+  .left-panel {
+    border-right: none;
+    border-bottom: 2px solid #ddd;
+  }
+}
