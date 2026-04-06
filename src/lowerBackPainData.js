@@ -51,11 +51,12 @@ const clinicalData = {
             ],
           },
           // Custom note generation for 'kyllä' with sub-question values
-          customNote: (answers) => {
-            const when = answers['trauma_when'] || '...';
-            const what = answers['trauma_what'] || '...';
-            return `Taustalla on selän trauma noin ${when} sitten, jolloin potilas ${what}.`;
-          },
+customNote: (answers) => {
+  if (answers.trauma !== 'kyllä') return '';
+  const when = answers['trauma_when'] || '...';
+  const what = answers['trauma_what'] || '...';
+  return `Taustalla on selän trauma noin ${when} sitten, jolloin potilas ${what}.`;
+},
         },
         {
           id: 'pain_location',

@@ -1,15 +1,48 @@
 import React, { useState } from 'react';
 import './App.css';
-import clinicalData from './clinicalData';
+import scenarios from './scenarios';
+
+// ============================================================
+// COMPONENT: HomePage
+// ============================================================
+function HomePage({ onSelectScenario }) {
+  return (
+    <div className="home-page">
+      <div className="home-header">
+        <h1 className="home-brand">Näsi Medical</h1>
+        <p className="home-tagline">Kliinisen dokumentaation työkalu</p>
+      </div>
+
+      <div className="home-content">
+        <h2 className="home-section-title">Valitse kliininen skenaario</h2>
+        <div className="scenario-grid">
+          {scenarios.map((scenario) => (
+            <button
+              key={scenario.id}
+              className="scenario-card"
+              onClick={() => onSelectScenario(scenario.id)}
+            >
+              <div className="scenario-icon">{scenario.icon}</div>
+              <h3 className="scenario-title">{scenario.title}</h3>
+              <p className="scenario-description">{scenario.description}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <footer className="home-footer">
+        <p>Näsi Medical — kliinisen dokumentaation työkalu</p>
+      </footer>
+    </div>
+  );
+}
 
 // ============================================================
 // COMPONENT: QuestionRenderer
-// Renders a single question based on its type, handles sub-questions
 // ============================================================
 function QuestionRenderer({ question, answers, onAnswer, depth = 0 }) {
   const currentValue = answers[question.id];
 
-  // --- Text input ---
   if (question.type === 'text') {
     return (
       <div className={`question-block depth-${depth}`}>
@@ -25,7 +58,6 @@ function QuestionRenderer({ question, answers, onAnswer, depth = 0 }) {
     );
   }
 
-  // --- Single choice ---
   if (question.type === 'single') {
     return (
       <div className={`question-block depth-${depth}`}>
@@ -44,7 +76,6 @@ function QuestionRenderer({ question, answers, onAnswer, depth = 0 }) {
             </button>
           ))}
         </div>
-        {/* Render sub-questions if the selected option triggers them */}
         {currentValue && question.subQuestions && question.subQuestions[currentValue] && (
           <div className="sub-questions">
             {question.subQuestions[currentValue].map((subQ) => (
@@ -62,7 +93,6 @@ function QuestionRenderer({ question, answers, onAnswer, depth = 0 }) {
     );
   }
 
-  // --- Multi choice ---
   if (question.type === 'multi') {
     const selectedValues = currentValue || [];
     const toggleOption = (option) => {
@@ -87,6 +117,24 @@ function QuestionRenderer({ question, answers, onAnswer, depth = 0 }) {
             </button>
           ))}
         </div>
+        {/* Multi-select sub-questions: render for each selected option */}
+        {question.multiSubQuestions && selectedValues.map((selectedOption) => {
+          const subQs = question.multiSubQuestions[selectedOption];
+          if (!subQs) return null;
+          return (
+            <div key={selectedOption} className="sub-questions">
+              {subQs.map((subQ) => (
+                <QuestionRenderer
+                  key={`${selectedOption}-${subQ.id}`}
+                  question={subQ}
+                  answers={answers}
+                  onAnswer={onAnswer}
+                  depth={depth + 1}
+                />
+              ))}
+            </div>
+          );
+        })}
       </div>
     );
   }
@@ -96,42 +144,41 @@ function QuestionRenderer({ question, answers, onAnswer, depth = 0 }) {
 
 // ============================================================
 // FUNCTION: generateNoteForQuestion
-// Generates the clinical note text for a single question
 // ============================================================
 function generateNoteForQuestion(question, answers) {
   const value = answers[question.id];
-  if (value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
-    return '';
-  }
 
   let noteText = '';
 
-  // Check for custom note generator (e.g. trauma question)
-  if (question.customNote && value === 'kyllä') {
-    noteText = question.customNote(answers);
-  }
-  // noteMap: direct mapping from option to text
-  else if (question.noteMap && question.noteMap[value]) {
-    noteText = question.noteMap[value];
-  }
-  // noteTemplate with {value} placeholder for single choice
-  else if (question.noteTemplate && typeof value === 'string') {
-    noteText = question.noteTemplate.replace('{value}', value);
-  }
-  // noteTemplate with {value} placeholder for multi choice (join with comma)
-  // If noteValues exists, use conjugated forms instead of raw option labels
-  else if (question.noteTemplate && Array.isArray(value)) {
-    const displayValues = value.map((v) => {
-      if (question.noteValues && question.noteValues[v]) {
-        return question.noteValues[v];
-      }
-      return v;
-    });
-    noteText = question.noteTemplate.replace('{value}', displayValues.join(', '));
+  // Custom note generator takes precedence
+  if (question.customNote) {
+    const custom = question.customNote(answers);
+    if (custom) noteText = custom;
   }
 
-  // Now handle sub-questions recursively
-  if (question.subQuestions && question.subQuestions[value]) {
+  if (!noteText) {
+    if (value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
+      // No value and no custom note = nothing
+    }
+    else if (question.noteMap && question.noteMap[value]) {
+      noteText = question.noteMap[value];
+    }
+    else if (question.noteTemplate && typeof value === 'string') {
+      noteText = question.noteTemplate.replace('{value}', value);
+    }
+    else if (question.noteTemplate && Array.isArray(value)) {
+      const displayValues = value.map((v) => {
+        if (question.noteValues && question.noteValues[v]) {
+          return question.noteValues[v];
+        }
+        return v;
+      });
+      noteText = question.noteTemplate.replace('{value}', displayValues.join(', '));
+    }
+  }
+
+  // Handle single-choice sub-questions
+  if (question.subQuestions && typeof value === 'string' && question.subQuestions[value]) {
     question.subQuestions[value].forEach((subQ) => {
       const subNote = generateNoteForQuestion(subQ, answers);
       if (subNote) {
@@ -140,20 +187,58 @@ function generateNoteForQuestion(question, answers) {
     });
   }
 
+  // Handle multi-choice sub-questions
+  if (question.multiSubQuestions && Array.isArray(value)) {
+    value.forEach((selectedOption) => {
+      const subQs = question.multiSubQuestions[selectedOption];
+      if (subQs) {
+        subQs.forEach((subQ) => {
+          const subNote = generateNoteForQuestion(subQ, answers);
+          if (subNote) {
+            noteText += ' ' + subNote;
+          }
+        });
+      }
+    });
+  }
+
   return noteText.trim();
 }
 
 // ============================================================
-// FUNCTION: calculateSTarTScore
-// Calculates the STarT Back Screening Tool score
+// FUNCTION: flattenQuestions
+// Recursively collects all questions including sub-questions
+// ============================================================
+function flattenQuestions(questions) {
+  const result = [];
+  questions.forEach((q) => {
+    result.push(q);
+    if (q.subQuestions) {
+      Object.values(q.subQuestions).forEach((subQs) => {
+        result.push(...flattenQuestions(subQs));
+      });
+    }
+    if (q.multiSubQuestions) {
+      Object.values(q.multiSubQuestions).forEach((subQs) => {
+        result.push(...flattenQuestions(subQs));
+      });
+    }
+  });
+  return result;
+}
+
+// ============================================================
+// FUNCTION: calculateSTarTScore (for lower back pain app)
 // ============================================================
 function calculateSTarTScore(questions, answers) {
   let totalScore = 0;
   let psychosocialScore = 0;
+  let answeredCount = 0;
 
   questions.forEach((q) => {
     const value = answers[q.id];
     if (value !== undefined && q.points) {
+      answeredCount += 1;
       const points = q.points[value] || 0;
       totalScore += points;
       if (q.psychosocialItem) {
@@ -163,7 +248,9 @@ function calculateSTarTScore(questions, answers) {
   });
 
   let riskLevel = '';
-  if (totalScore <= 3) {
+  if (answeredCount === 0) {
+    // no answers yet -> don't produce a risk level
+  } else if (totalScore <= 3) {
     riskLevel = 'matala riski';
   } else if (totalScore >= 4 && psychosocialScore <= 3) {
     riskLevel = 'kohtalainen riski';
@@ -175,11 +262,155 @@ function calculateSTarTScore(questions, answers) {
 }
 
 // ============================================================
-// MAIN APP COMPONENT
+// FUNCTION: calculateQuestionnaireScores
+// Generic scoring for questions with `scoring` field
 // ============================================================
-function App() {
+function calculateQuestionnaireScores(clinicalData, answers) {
+  // Collect all questions from all sections recursively
+  const allQuestions = [];
+  clinicalData.sections.forEach((section) => {
+    if (section.questions) {
+      allQuestions.push(...flattenQuestions(section.questions));
+    }
+    if (section.subSections) {
+      section.subSections.forEach((sub) => {
+        if (sub.questions) allQuestions.push(...flattenQuestions(sub.questions));
+      });
+    }
+  });
+
+  // Build raw score data per questionnaire
+  const rawData = {}; // { questionnaireId: { pairs: {1: {A: 2, B: 3}}, directSum: 0, categorySums: {} } }
+
+  allQuestions.forEach((q) => {
+    if (!q.scoring) return;
+    const value = answers[q.id];
+    if (value === undefined) return;
+
+    q.scoring.forEach((entry) => {
+      const qId = entry.questionnaire;
+      if (!rawData[qId]) {
+        rawData[qId] = { pairs: {}, directSum: 0, categorySums: {}, hasAnyAnswer: false };
+      }
+      const points = entry.points[value];
+      if (points === undefined) return;
+
+      rawData[qId].hasAnyAnswer = true;
+
+      if (entry.pair) {
+        // DAN-PSS-1 style: pair-based
+        if (!rawData[qId].pairs[entry.pair]) {
+          rawData[qId].pairs[entry.pair] = { A: null, B: null, category: entry.category };
+        }
+        rawData[qId].pairs[entry.pair][entry.pairRole] = points;
+      } else {
+        // Simple sum
+        rawData[qId].directSum += points;
+      }
+    });
+  });
+
+  // Compute final scores
+  const scores = {};
+  Object.entries(rawData).forEach(([qId, data]) => {
+    let total = 0;
+    const categorySums = {};
+
+    if (Object.keys(data.pairs).length > 0) {
+      // Pair-product scoring (DAN-PSS-1)
+      Object.values(data.pairs).forEach((pair) => {
+        const a = pair.A !== null ? pair.A : 0;
+        const b = pair.B !== null ? pair.B : 0;
+        const pairScore = a * b;
+        total += pairScore;
+        if (pair.category) {
+          categorySums[pair.category] = (categorySums[pair.category] || 0) + pairScore;
+        }
+      });
+    } else {
+      total = data.directSum;
+    }
+
+    scores[qId] = {
+      total,
+      categorySums,
+      hasAnyAnswer: data.hasAnyAnswer,
+    };
+  });
+
+  return scores;
+}
+
+// ============================================================
+// FUNCTION: buildQuestionnaireNoteText
+// ============================================================
+function buildQuestionnaireNoteText(questionnaireConfig, scoreData) {
+  if (!scoreData || !scoreData.hasAnyAnswer) return '';
+
+  const total = scoreData.total;
+  const threshold = questionnaireConfig.thresholds.find(
+    (t) => total >= t.min && total <= t.max
+  );
+  if (!threshold) return '';
+
+  let text = questionnaireConfig.noteTemplate;
+  text = text.replace('{label}', threshold.label);
+  text = text.replace('{total}', total);
+  Object.entries(scoreData.categorySums).forEach(([cat, sum]) => {
+    text = text.replace(`{${cat}}`, sum);
+  });
+  return text;
+}
+
+// ============================================================
+// COMPONENT: QuestionnaireScoreBox
+// ============================================================
+function QuestionnaireScoreBox({ config, scoreData }) {
+  if (!scoreData || !scoreData.hasAnyAnswer) {
+    return (
+      <div className="questionnaire-box">
+        <h3>{config.name}</h3>
+        <p className="questionnaire-desc">{config.description}</p>
+        <p className="questionnaire-placeholder">Ei vielä vastauksia. Vastaa kysymyksiin anamneesissa nähdäksesi pisteet.</p>
+      </div>
+    );
+  }
+
+  const total = scoreData.total;
+  const threshold = config.thresholds.find((t) => total >= t.min && total <= t.max);
+  const label = threshold ? threshold.label : '';
+
+  return (
+    <div className="questionnaire-box">
+      <h3>{config.name}</h3>
+      <p className="questionnaire-desc">{config.description}</p>
+      <div className="questionnaire-score">
+        <div className="score-main">
+          <span className="score-value">{total}</span>
+          <span className="score-label">{label}</span>
+        </div>
+        {Object.keys(scoreData.categorySums).length > 0 && (
+          <div className="score-breakdown">
+            {Object.entries(scoreData.categorySums).map(([cat, sum]) => (
+              <div key={cat} className="breakdown-item">
+                <span className="breakdown-label">{cat}:</span> <strong>{sum}</strong>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <p className="questionnaire-info">{config.info}</p>
+    </div>
+  );
+}
+
+// ============================================================
+// COMPONENT: ScenarioApp
+// ============================================================
+function ScenarioApp({ scenario, onBackToHome }) {
+  const clinicalData = scenario.data;
   const [answers, setAnswers] = useState({});
-  const [activeSection, setActiveSection] = useState('anamneesi');
+  const [activeSection, setActiveSection] = useState(clinicalData.sections[0].id);
   const [copied, setCopied] = useState(false);
 
   const handleAnswer = (questionId, value) => {
@@ -189,14 +420,21 @@ function App() {
     }));
   };
 
-  // --- Generate the full clinical note ---
+  // Find questionnaire config (if any)
+  const questionnaireConfigs = (() => {
+    const kyselyt = clinicalData.sections.find((s) => s.isQuestionnaireDisplay);
+    return kyselyt ? kyselyt.questionnaires : [];
+  })();
+
+  const questionnaireScores = calculateQuestionnaireScores(clinicalData, answers);
+
   const generateFullNote = () => {
     const noteParts = [];
 
     clinicalData.sections.forEach((section) => {
       const sectionNotes = [];
 
-      // STarT questionnaire - special handling
+      // STarT questionnaire - legacy special handling (for lower back pain)
       if (section.isScored) {
         const { totalScore, psychosocialScore, riskLevel } = calculateSTarTScore(
           section.questions,
@@ -209,8 +447,16 @@ function App() {
         }
       }
 
-      // Regular sections with questions
-      if (section.questions) {
+      // Questionnaire display section (urinary difficulties)
+      if (section.isQuestionnaireDisplay && section.questionnaires) {
+        section.questionnaires.forEach((config) => {
+          const scoreData = questionnaireScores[config.id];
+          const noteText = buildQuestionnaireNoteText(config, scoreData);
+          if (noteText) sectionNotes.push(noteText);
+        });
+      }
+
+      if (section.questions && !section.isQuestionnaireDisplay) {
         let currentParagraph = [];
         section.questions.forEach((q) => {
           if (!section.isScored) {
@@ -229,7 +475,6 @@ function App() {
         }
       }
 
-      // Sections with subSections (STATUS)
       if (section.subSections) {
         section.subSections.forEach((subSection) => {
           const subNotes = [];
@@ -269,15 +514,35 @@ function App() {
     setAnswers({});
   };
 
-  // --- Count answered questions for progress indicator ---
   const countAnswered = () => {
     return Object.keys(answers).length;
   };
 
-  // --- Find the currently active section data ---
   const renderLeftPanel = () => {
     const section = clinicalData.sections.find((s) => s.id === activeSection);
     if (!section) return null;
+
+    // Questionnaire display section
+    if (section.isQuestionnaireDisplay) {
+      return (
+        <div className="left-panel-content">
+          <div className="section-header-card">
+            <h2 className="section-title">{section.title}</h2>
+            <p className="section-description">
+              Pisteet lasketaan automaattisesti anamneesissa annettujen vastausten perusteella.
+            </p>
+          </div>
+          {section.questionnaires.map((config) => (
+            <div key={config.id} className="question-card">
+              <QuestionnaireScoreBox
+                config={config}
+                scoreData={questionnaireScores[config.id]}
+              />
+            </div>
+          ))}
+        </div>
+      );
+    }
 
     return (
       <div className="left-panel-content">
@@ -288,7 +553,6 @@ function App() {
           )}
         </div>
 
-        {/* Regular questions (ANAMNEESI, RED FLAGS, STarT) */}
         {section.questions && section.questions.map((q) => (
           <div key={q.id} className="question-card">
             <QuestionRenderer
@@ -299,7 +563,7 @@ function App() {
           </div>
         ))}
 
-        {/* STarT score display */}
+        {/* STarT score display (legacy) */}
         {section.isScored && (
           <div className="start-score-display">
             {(() => {
@@ -325,7 +589,19 @@ function App() {
           </div>
         )}
 
-        {/* SubSections (STATUS) */}
+        {/* Show questionnaire scores at bottom of anamneesi for urinary difficulties */}
+        {section.showQuestionnaireScores && questionnaireConfigs.length > 0 && (
+          <div className="questionnaire-scores-inline">
+            {questionnaireConfigs.map((config) => (
+              <QuestionnaireScoreBox
+                key={config.id}
+                config={config}
+                scoreData={questionnaireScores[config.id]}
+              />
+            ))}
+          </div>
+        )}
+
         {section.subSections && section.subSections.map((subSection) => (
           <div key={subSection.id} className="sub-section-card">
             <h3 className="sub-section-title">{subSection.title}</h3>
@@ -346,19 +622,21 @@ function App() {
   return (
     <div className="app-wrapper">
       <div className="app-container">
-        {/* TOP BAR */}
         <header className="top-bar">
           <div className="top-bar-left">
+            <button className="back-button" onClick={onBackToHome}>
+              ← Etusivu
+            </button>
+            <span className="brand-divider"></span>
             <span className="brand-name">Näsi Medical</span>
             <span className="brand-divider"></span>
-            <span className="brand-context">Alaselkäkivun kliininen dokumentaatiotyökalu</span>
+            <span className="brand-context">{scenario.title}</span>
           </div>
           <div className="top-bar-right">
             <span className="answer-count">{countAnswered()} vastausta</span>
           </div>
         </header>
 
-        {/* NAVIGATION TABS */}
         <nav className="section-nav">
           {clinicalData.sections.map((section) => (
             <button
@@ -371,14 +649,11 @@ function App() {
           ))}
         </nav>
 
-        {/* MAIN CONTENT */}
         <div className="main-content">
-          {/* LEFT PANEL - Questions */}
           <div className="left-panel">
             {renderLeftPanel()}
           </div>
 
-          {/* RIGHT PANEL - Clinical Note */}
           <div className="right-panel">
             <div className="note-panel-header">
               <h2>Potilasasiakirjamerkintä</h2>
@@ -416,6 +691,28 @@ function App() {
         </div>
       </div>
     </div>
+  );
+}
+
+// ============================================================
+// MAIN APP COMPONENT
+// ============================================================
+function App() {
+  const [currentScenarioId, setCurrentScenarioId] = useState(null);
+
+  const currentScenario = scenarios.find((s) => s.id === currentScenarioId);
+
+  if (currentScenario) {
+    return (
+      <ScenarioApp
+        scenario={currentScenario}
+        onBackToHome={() => setCurrentScenarioId(null)}
+      />
+    );
+  }
+
+  return (
+    <HomePage onSelectScenario={(id) => setCurrentScenarioId(id)} />
   );
 }
 

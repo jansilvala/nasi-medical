@@ -1,3 +1,223 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@500&display=swap');
+
+/* ============================================================
+   QUESTIONNAIRE SCORE BOX
+   ============================================================ */
+.questionnaire-scores-inline {
+  margin-top: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.questionnaire-box {
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-muted);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--accent-subtle);
+}
+
+.questionnaire-box h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.questionnaire-desc {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-md);
+  font-style: italic;
+}
+
+.questionnaire-placeholder {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  padding: var(--space-md) 0;
+}
+
+.questionnaire-score {
+  background: var(--bg-surface);
+  padding: var(--space-md);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.score-main {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.score-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+
+.score-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.score-breakdown {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.breakdown-item {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.breakdown-label {
+  color: var(--text-tertiary);
+}
+
+.questionnaire-info {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   HOME PAGE
+   ============================================================ */
+.home-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* <-- vertical centering */
+  background: var(--bg-workspace);
+  padding: var(--space-xl) var(--space-lg);
+}
+
+.home-header {
+  text-align: center;
+  padding: var(--space-lg) 0;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.home-brand {
+  /* distinctive serif display font for a refined, clinical feel */
+  font-family: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-sm);
+}
+
+.home-tagline {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+}
+
+.home-content {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-lg) 0;
+}
+
+.home-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-lg);
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+.scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-md);
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.scenario-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg) var(--space-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-family: inherit;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 110px;
+}
+
+.scenario-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.scenario-icon {
+  display: none; /* icon space removed entirely */
+}
+
+.scenario-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+  letter-spacing: -0.01em;
+}
+
+.scenario-description {
+  font-size: 0.82rem;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+
+.home-footer {
+  text-align: center;
+  padding: var(--space-lg) 0;
+  color: var(--text-tertiary);
+  font-size: 0.82rem;
+}
+
+/* ============================================================
+   BACK BUTTON
+   ============================================================ */
+.back-button {
+  padding: 6px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.back-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
 /* ============================================================
    NÄSI MEDICAL — Redesigned Clinical Documentation UI
    Design: Modern clinical, card-based, calm & trustworthy
